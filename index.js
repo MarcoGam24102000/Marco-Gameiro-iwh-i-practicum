@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const app = express();
@@ -8,20 +9,59 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // * Please DO NOT INCLUDE the private app access token in your repo. Don't do this practicum in your normal account.
-const PRIVATE_APP_ACCESS = '';
+const PRIVATE_APP_ACCESS = process.env.PRIVATE_APP_ACCESS_TOKEN;
 
-// TODO: ROUTE 1 - Create a new app.get route for the homepage to call your custom object data. Pass this data along to the front-end and create a new pug template in the views folder.
+// TODO: ROUTE 1 - Create a new route that renders a table of custom object data
+app.get('/', async (req, res) => {
+    // REPLACE '2-xxxxxxx' with your actual Object ID from the URL
+    const petsUrl = 'https://api.hubapi.com/crm/v3/objects/2-201122113?properties=name,bio,species';
+    const headers = {  
+        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+        'Content-Type': 'application/json'
+    };
 
-// * Code for Route 1 goes here
+    try {
+        const resp = await axios.get(petsUrl, { headers });
+        const data = resp.data.results;
+        // This renders the homepage.pug file and passes the pet data to it
+        res.render('homepage', { title: 'Custom Objects | HubSpot Academy', data });      
+    } catch (error) {
+        console.error('Error fetching pets:', error.message);
+    }
+});
 
-// TODO: ROUTE 2 - Create a new app.get route for the form to create or update new custom object data. Send this data along in the next route.
+// ROUTE 2 - Show the form
+app.get('/update-cview', async (req, res) => {
+    try {
+        res.render('updates', { title: 'Update Custom Object Form | HubSpot Academy' });
+    } catch (error) {
+        console.error(error);
+    }
+});
 
-// * Code for Route 2 goes here
+// ROUTE 3 - Post the new data to HubSpot
+app.post('/update-cview', async (req, res) => {
+    const update = {
+        properties: {
+            "name": req.body.name,
+            "species": req.body.species,
+            "bio": req.body.bio
+        }
+    }
 
-// TODO: ROUTE 3 - Create a new app.post route for the custom objects form to create or update your custom object data. Once executed, redirect the user to the homepage.
+    const updateUrl = `https://api.hubapi.com/crm/v3/objects/2-201122113`;
+    const headers = {
+        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+        'Content-Type': 'application/json'
+    };
 
-// * Code for Route 3 goes here
-
+    try { 
+        await axios.post(updateUrl, update, { headers } );
+        res.redirect('/');
+    } catch(err) {
+        console.error(err);
+    }
+});
 /** 
 * * This is sample code to give you a reference for how you should structure your calls. 
 
