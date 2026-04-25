@@ -1,0 +1,46 @@
+doctype html
+html(lang="en")
+    head
+        title= `${title}`
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(rel="stylesheet", href="/css/style.css")
+    body
+        .container
+            //- Form Section
+            .form-wrapper
+                h1 Add a New Pet
+                p
+                    a(href="/") Return to the homepage
+                form(method="POST" action="/update-cview")
+                    label(for="name") Pet Name
+                    input(type="text" name="name" id="name" required)
+                    
+                    label(for="species") Species
+                    input(type="text" name="species" id="species" required)
+                    
+                    label(for="bio") Bio
+                    textarea(name="bio" id="bio" required)
+                    
+                    input(type="submit" value="Submit")
+
+            hr
+
+            //- Table Section
+            .table-wrapper
+                h2 Custom Object Table (Pets)
+                table
+                    thead
+                        tr
+                            th Name
+                            th Species
+                            th Bio
+                    tbody
+                        if data && data.length
+                            each pet in data
+                                tr
+                                    td #{pet.properties.name}
+                                    td #{pet.properties.species}
+                                    td #{pet.properties.bio}
+                        else
+                            tr
+                                td(colspan="3") No pets found.
